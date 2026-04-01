@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perplexity - Clone</title>
+    <style>
+        :root {
+            --sidebar-bg: #f9f9f9;
+            --main-bg: #ffffff;
+            --text-color: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --hover-bg: #f3f4f6;
+            --ring-color: #2563eb;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--main-bg);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0 1rem;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .nav-item.active {
+            background-color: var(--hover-bg);
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4rem 2rem;
+            overflow-y: auto;
+        }
+
+        .logo-large {
+            font-size: 3.5rem;
+            font-weight: 600;
+            letter-spacing: -1.5px;
+            margin-bottom: 2.5rem;
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 750px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-container:focus-within {
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            resize: none;
+            min-height: 40px;
+            max-height: 200px;
+            overflow-y: hidden;
+            background: transparent;
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .left-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .control-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        .submit-btn {
+            background-color: var(--text-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Suggestions section */
+        .suggestions {
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 750px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .suggestion-card {
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .suggestion-card:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-color);
+        }
+
+        /* Chat history */
+        .chat-history {
+            width: 100%;
+            max-width: 750px;
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .chat-message {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .user-bubble {
+            align-self: flex-end;
+            background: #1f2937;
+            color: #fff;
+            padding: 0.75rem 1.25rem;
+            border-radius: 16px 16px 4px 16px;
+            max-width: 80%;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .ai-bubble {
+            align-self: flex-start;
+            background: var(--hover-bg);
+            color: var(--text-color);
+            padding: 1.25rem 1.5rem;
+            border-radius: 16px 16px 16px 4px;
+            max-width: 90%;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            border: 1px solid var(--border-color);
+        }
+
+        .ai-bubble p { margin-bottom: 0.5rem; }
+        .ai-bubble p:last-child { margin-bottom: 0; }
+        .ai-bubble strong { font-weight: 600; }
+
+        .loading {
+            opacity: 0.6;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* History List Styling */
+        .history-section {
+            margin-top: 1.5rem;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 1rem;
+        }
+
+        .history-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            padding-left: 0.5rem;
+        }
+
+        .history-item {
+            padding: 0.6rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--text-color);
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background 0.2s;
+            margin-bottom: 2px;
+        }
+
+        .history-item:hover {
+            background-color: var(--hover-bg);
+        }
+
+        .history-item.active {
+            background-color: var(--hover-bg);
+            font-weight: 600;
+            border-left: 3px solid var(--text-color);
+        }
+
+        .new-chat-btn {
+            margin: 0 1rem 1.5rem;
+            padding: 0.75rem;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .new-chat-btn:hover {
+            background: var(--hover-bg);
+            border-color: #cbd5e1;
+        }
+
+        /* PDF Badge Styling */
+        #pdf-badge {
+            display: none;
+            background: #eef2ff;
+            color: #4f46e5;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            border: 1px solid #c7d2fe;
+            max-width: fit-content;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            Perplexity
+        </div>
+        <button class="new-chat-btn" onclick="startNewChat()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            New Chat
+        </button>
+
+        <nav class="nav-items">
+            <a class="nav-item active" onclick="startNewChat()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Search
+            </a>
+            <a class="nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                Discover
+            </a>
+            <a class="nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Sign In
+            </a>
+        </nav>
+
+        <div class="history-section">
+            <div class="history-label">History</div>
+            <div id="sessions-list">
+                <!-- History items will be injected here -->
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <a class="nav-item" style="font-size: 0.9rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                Try Pro
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h1 class="logo-large">perplexity</h1>
+        
+        <div class="search-container">
+            <textarea class="search-input" id="chat-input" placeholder="Ask anything..." rows="1" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+            
+            <div class="search-controls">
+                <div class="left-controls">
+                    <button class="control-btn" title="Focus">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+                        Focus
+                    </button>
+                    <button class="control-btn" id="attach-btn" title="Attach">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                        Attach
+                    </button>
+                    <!-- Hidden PDF input -->
+                    <input type="file" id="pdf-input" accept=".pdf" style="display: none;">
+                </div>
+                
+                <button class="submit-btn" id="chat-submit" aria-label="Submit">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Sample Suggestions Grid -->
+        <div class="suggestions">
+            <div class="suggestion-card">
+                What are some fun things to do in Tokyo?
+            </div>
+            <div class="suggestion-card">
+                Explain Quantum Computing to a child
+            </div>
+            <div class="suggestion-card">
+                Write a python script for web scraping
+            </div>
+        </div>
+
+        <!-- Chat history -->
+        <div id="chat-history" class="chat-history"></div>
+
+        <!-- Hidden Global Error Display -->
+        <div id="global-error" style="display:none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #fee2e2; color: #b91c1c; padding: 10px 20px; border-radius: 8px; border: 1px solid #f87171; z-index: 9999; font-size: 0.85rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+    </main>
+
+    <script>
+        function showError(msg) {
+            const errDiv = document.getElementById('global-error');
+            errDiv.textContent = msg;
+            errDiv.style.display = 'block';
+            console.error(msg);
+        }
+
+        window.onerror = function(message, source, lineno, colno, error) {
+            showError(`JS Error: ${message} at line ${lineno}`);
+            return false;
+        };
+
+        try {
+            const chatInput = document.getElementById('chat-input');
+            const chatSubmit = document.getElementById('chat-submit');
+            const chatHistory = document.getElementById('chat-history');
+            const sessionsList = document.getElementById('sessions-list');
+            const suggestionsDiv = document.querySelector('.suggestions');
+            const mainContent = document.querySelector('.main-content');
+            const logoLarge = document.querySelector('.logo-large');
+            const attachBtn = document.getElementById('attach-btn');
+            const pdfInput = document.getElementById('pdf-input');
+            const searchContainer = document.querySelector('.search-container');
+            
+            // --- Backend Connection Logic ---
+            const API_BASE = (window.location.protocol === 'file:' || !window.location.port) 
+                ? 'http://127.0.0.1:8080' 
+                : window.location.origin;
+
+            console.log("Using API_BASE:", API_BASE);
+
+            // Add a connection status indicator to the UI
+            const statusDot = document.createElement('div');
+            statusDot.id = 'backend-status';
+            statusDot.style = 'position: fixed; bottom: 20px; right: 20px; width: 12px; height: 12px; border-radius: 50%; background: #ccc; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2); z-index: 1000; cursor: pointer;';
+            statusDot.title = 'Checking backend connection...';
+            document.body.appendChild(statusDot);
+
+            async function checkBackend() {
+                try {
+                    const res = await fetch(`${API_BASE}/health`);
+                    if (res.ok) {
+                        statusDot.style.background = '#22c55e'; // Green
+                        statusDot.title = 'Backend Connected';
+                        document.getElementById('global-error').style.display = 'none';
+                    } else {
+                        statusDot.style.background = '#ef4444'; // Red
+                        statusDot.title = 'Backend Error';
+                    }
+                } catch (err) {
+                    statusDot.style.background = '#ef4444'; // Red
+                    statusDot.title = 'Backend Disconnected (Check if Flask is running)';
+                }
+            }
+            setInterval(checkBackend, 5000); // Check every 5 seconds
+            checkBackend();
+        
+        let currentSessionId = 'session_' + Date.now();
+        let isFirstMessage = true;
+
+        // Create PDF badge UI element
+        const pdfBadge = document.createElement('div');
+        pdfBadge.id = 'pdf-badge';
+        searchContainer.parentNode.insertBefore(pdfBadge, searchContainer);
+
+        function formatMarkdown(text) {
+            return text
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+        }
+
+        async function loadSessions() {
+            try {
+                const res = await fetch(`${API_BASE}/api/sessions`);
+                const sessions = await res.json();
+                
+                sessionsList.innerHTML = '';
+                sessions.forEach(s => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item' + (s.id === currentSessionId ? ' active' : '');
+                    item.title = s.title;
+                    item.textContent = s.title;
+                    item.onclick = () => loadChat(s.id);
+                    sessionsList.appendChild(item);
+                });
+            } catch (err) {
+                console.error("Failed to load sessions", err);
+            }
+        }
+
+        async function loadChat(sessionId) {
+            currentSessionId = sessionId;
+            isFirstMessage = false;
+            
+            suggestionsDiv.style.display = 'none';
+            logoLarge.style.display = 'none';
+            pdfBadge.style.display = 'none'; // Reset badge
+            chatHistory.innerHTML = '<div class="loading">Loading history...</div>';
+            loadSessions();
+
+            try {
+                const res = await fetch(`${API_BASE}/api/history/${sessionId}`);
+                const history = await res.json();
+                
+                chatHistory.innerHTML = '';
+                history.forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'chat-message';
+                    
+                    if (msg.role === 'user') {
+                        // Strip internal RAG prompt text for display if it's there
+                        let displayMsg = msg.text;
+                        if (displayMsg.includes('--- START OF PDF CONTEXT ---')) {
+                            const parts = displayMsg.split('User Question: ');
+                            displayMsg = parts[parts.length - 1] || msg.text;
+                        }
+                        msgDiv.innerHTML = `<div class="user-bubble">${displayMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+                    } else {
+                        const aiDiv = document.createElement('div');
+                        aiDiv.className = 'ai-bubble';
+                        aiDiv.innerHTML = `<p>${formatMarkdown(msg.text)}</p>`;
+                        msgDiv.appendChild(aiDiv);
+                    }
+                    chatHistory.appendChild(msgDiv);
+                });
+            } catch (err) {
+                chatHistory.innerHTML = '<p style="color: red;">Failed to load chat history.</p>';
+            }
+            
+            mainContent.scrollTop = mainContent.scrollHeight;
+        }
+
+        function startNewChat() {
+            currentSessionId = 'session_' + Date.now();
+            isFirstMessage = true;
+            chatHistory.innerHTML = '';
+            suggestionsDiv.style.display = 'grid';
+            logoLarge.style.display = 'block';
+            pdfBadge.style.display = 'none';
+            chatInput.value = '';
+            loadSessions();
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            if (isFirstMessage) {
+                suggestionsDiv.style.display = 'none';
+                logoLarge.style.display = 'none';
+            }
+
+            chatInput.value = '';
+            chatInput.style.height = '';
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message';
+            msgDiv.innerHTML = `<div class="user-bubble">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+            chatHistory.appendChild(msgDiv);
+
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'ai-bubble loading';
+            aiDiv.textContent = 'Thinking...';
+            msgDiv.appendChild(aiDiv);
+
+            mainContent.scrollTop = mainContent.scrollHeight;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, session_id: currentSessionId })
+                });
+
+                const data = await response.json();
+                aiDiv.classList.remove('loading');
+
+                if (response.ok) {
+                    aiDiv.innerHTML = `<p>${formatMarkdown(data.response)}</p>`;
+                    if (isFirstMessage) {
+                        isFirstMessage = false;
+                        loadSessions(); // Refresh list to show new title
+                    }
+                } else {
+                    aiDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                aiDiv.classList.remove('loading');
+                aiDiv.innerHTML = `<p style="color: red;">Connection error. Make sure the Flask server is running.</p>`;
+            }
+
+            mainContent.scrollTop = mainContent.scrollHeight;
+        }
+
+        // --- PDF Handling ---
+        attachBtn.onclick = () => pdfInput.click();
+
+        pdfInput.onchange = async () => {
+            const file = pdfInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('session_id', currentSessionId);
+
+            pdfBadge.style.display = 'block';
+            pdfBadge.textContent = 'Uploading PDF...';
+            pdfBadge.style.background = '#fef3c7'; // Processing color
+
+            try {
+                const res = await fetch(`${API_BASE}/api/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    pdfBadge.style.background = '#eef2ff'; // Success color
+                    pdfBadge.textContent = `📄 PDF Loaded: ${file.name}`;
+                    if (isFirstMessage) loadSessions(); // Refresh title
+                } else {
+                    pdfBadge.style.background = '#fee2e2'; // Error color
+                    pdfBadge.textContent = `❌ Error: ${data.error}`;
+                }
+            } catch (err) {
+                pdfBadge.style.background = '#fee2e2';
+                pdfBadge.textContent = `❌ Upload failed.`;
+            }
+            
+            pdfInput.value = ''; // Reset input
+        };
+
+        // Initial Load
+        loadSessions();
+
+        document.querySelectorAll('.suggestion-card').forEach(card => {
+            card.addEventListener('click', () => {
+                chatInput.value = card.textContent.trim();
+                sendMessage();
+            });
+        });
+
+        chatSubmit.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        } catch (initErr) {
+            console.error("Initialization error:", initErr);
+            // Non-critical error display is handled by window.onerror
+        }
+    </script>
+</body>
+</html>
